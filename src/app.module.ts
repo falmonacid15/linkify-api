@@ -1,9 +1,13 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './core/auth/auth.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ProfilesModule } from './modules/profiles/profiles.module';
+import { PostsModule } from './modules/posts/posts.module';
+import { APP_PIPE } from '@nestjs/core';
+import { InterestsModule } from './modules/interests/interests.module';
+import { FriendshipsModule } from './modules/friendships/friendships.module';
 
 @Module({
   imports: [
@@ -12,8 +16,18 @@ import { AuthModule } from './core/auth/auth.module';
     }),
     UsersModule,
     AuthModule,
+    NotificationsModule,
+    ProfilesModule,
+    PostsModule,
+    InterestsModule,
+    FriendshipsModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [
+    {
+      provide: APP_PIPE,
+      useClass: ValidationPipe,
+    },
+  ],
 })
 export class AppModule {}
