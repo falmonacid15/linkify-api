@@ -52,35 +52,38 @@ model Interest {
 }
 
 model Notification {
-  id        String           @id @default(uuid())
-  userId    String
-  type      NotificationType
-  content   String?
-  isRead    Boolean          @default(false)
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
+  id      String           @id @default(uuid())
+  userId  String
+  type    NotificationType
+  content String?
+  isRead  Boolean          @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Friendship {
-  id          String @id @default(uuid())
+  id     String           @id @default(uuid())
+  status FriendshipStatus @default(PENDING)
+
   requester   User   @relation("RequestSender", fields: [requesterId], references: [id])
   requesterId String
 
   receiver   User   @relation("RequestReceiver", fields: [receiverId], references: [id])
   receiverId String
 
-  status    FriendshipStatus @default(PENDING)
-  createdAt DateTime         @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Post {
-  id       String  @id @default(uuid())
+  id       String   @id @default(uuid())
   authorId String
   content  String
-  imageUrl String?
-  videoUrl String?
+  imageUrl String[] @default([])
+  videoUrl String[] @default([])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -133,10 +136,12 @@ model Repost {
 }
 
 model Conversation {
-  id        String   @id @default(uuid())
-  user1Id   String
-  user2Id   String
+  id      String @id @default(uuid())
+  user1Id String
+  user2Id String
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user1    User      @relation("ConversationUser1", fields: [user1Id], references: [id])
   user2    User      @relation("ConversationUser2", fields: [user2Id], references: [id])
@@ -146,12 +151,14 @@ model Conversation {
 }
 
 model Message {
-  id             String   @id @default(uuid())
+  id             String  @id @default(uuid())
   conversationId String
   senderId       String
   content        String
-  isRead         Boolean  @default(false)
-  createdAt      DateTime @default(now())
+  isRead         Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation(fields: [senderId], references: [id])
@@ -174,6 +181,7 @@ enum NotificationType {
 }
 
 enum FriendshipStatus {
+  FRIENDS
   PENDING
   ACCEPTED
   BLOCKED

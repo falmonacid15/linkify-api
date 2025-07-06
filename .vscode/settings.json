@@ -1,4 +1,12 @@
 {
-  "cSpell.words": ["HAHA", "Notificación", "Repost", "reposts"],
+  "cSpell.words": [
+    "datasource",
+    "HAHA",
+    "Notificación",
+    "postgresql",
+    "Repost",
+    "reposts",
+    "uuid"
+  ],
   "cSpell.language": "en,es-ES"
 }
