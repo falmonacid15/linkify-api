@@ -8,6 +8,9 @@ import { PostsModule } from './modules/posts/posts.module';
 import { APP_PIPE } from '@nestjs/core';
 import { InterestsModule } from './modules/interests/interests.module';
 import { FriendshipsModule } from './modules/friendships/friendships.module';
+import { CommentsModule } from './modules/comments/comments.module';
+import { ReactionsModule } from './modules/reactions/reactions.module';
+import { RepostsModule } from './modules/reposts/reposts.module';
 
 @Module({
   imports: [
@@ -21,6 +24,9 @@ import { FriendshipsModule } from './modules/friendships/friendships.module';
     PostsModule,
     InterestsModule,
     FriendshipsModule,
+    CommentsModule,
+    ReactionsModule,
+    RepostsModule,
   ],
   controllers: [],
   providers: [

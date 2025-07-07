@@ -3,11 +3,26 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../Prisma.service';
+import { deleteImage, uploadMultipleImages } from 'src/utils/cloudinary';
+
+type Files = {
+  images?: Express.Multer.File[];
+  videos?: Express.Multer.File[];
+};
 
 @Injectable()
 export class PostsService {
   constructor(private readonly prisma: PrismaService) {}
-  async create(data: CreatePostDto) {
+  async create(data: CreatePostDto, files: Files) {
+    const { images, videos } = files;
+
+    if (images) {
+      data.imageUrl = await uploadMultipleImages(
+        images,
+        `users/${data.authorId}/posts/images`,
+      );
+    }
+
     return await this.prisma.post.create({
       data,
     });
@@ -50,6 +65,18 @@ export class PostsService {
             },
           },
           reactions: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  avatarUrl: true,
+                },
+              },
+            },
+          },
+          reposts: {
             include: {
               user: {
                 select: {
@@ -128,7 +155,26 @@ export class PostsService {
     });
   }
 
-  async update(where: Prisma.PostWhereUniqueInput, data: UpdatePostDto) {
+  async update(
+    where: Prisma.PostWhereUniqueInput,
+    data: UpdatePostDto,
+    files: Files,
+  ) {
+    const { images, videos } = files;
+    const post = await this.prisma.post.findUnique({ where });
+
+    if (images) {
+      if (post?.imageUrl.length) {
+        for (const imageUrl of post.imageUrl) {
+          await deleteImage(imageUrl);
+        }
+      }
+      data.imageUrl = await uploadMultipleImages(
+        images,
+        `users/${data.authorId}/posts/images`,
+      );
+    }
+
     return await this.prisma.post.update({ where, data });
   }
 
