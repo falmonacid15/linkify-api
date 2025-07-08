@@ -23,7 +23,12 @@ export class NotificationsService {
     });
   }
 
-  async findAll(where?: Prisma.NotificationWhereInput) {
+  async findAll(
+    page?: number,
+    perPage?: number,
+    where?: Prisma.NotificationWhereInput,
+    orderBy?: Prisma.NotificationOrderByWithRelationInput,
+  ) {
     return await this.prisma.notification.findMany({
       where,
       include: {

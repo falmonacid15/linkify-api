@@ -25,9 +25,9 @@ export class NotificationsController {
     @Query('where', ParseObjectPipe)
     where?: Prisma.NotificationWhereUniqueInput,
     @Query('orderBy', ParseObjectPipe)
-    orderBy?: Prisma.InterestOrderByWithRelationInput,
+    orderBy?: Prisma.NotificationOrderByWithRelationInput,
   ) {
-    return this.notificationsService.findAll(where);
+    return this.notificationsService.findAll(page, perPage, where, orderBy);
   }
 
   @Patch(':id')
