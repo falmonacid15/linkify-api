@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { PrismaService } from '../../Prisma.service';
+import { UpdateNotificationDto } from './dto/update-notification.dto';
 
 @Injectable()
 export class NotificationsService {
@@ -14,6 +15,7 @@ export class NotificationsService {
     return await this.prisma.notification.create({
       data: {
         ...notificationData,
+
         user: {
           connect: { id: userId },
         },
@@ -23,15 +25,19 @@ export class NotificationsService {
 
   async findAll(where?: Prisma.NotificationWhereInput) {
     return await this.prisma.notification.findMany({
+      where,
       include: {
         user: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
   }
 
   async update(
     where: Prisma.NotificationWhereUniqueInput,
-    data: Prisma.NotificationUpdateInput,
+    data: UpdateNotificationDto,
   ) {
     return await this.prisma.notification.update({
       where,

@@ -29,6 +29,11 @@ export class UsersController {
     return this.usersService.create(data);
   }
 
+  @Get('search-engine')
+  searchEngine(@Query('searchTerm') searchTerm: string) {
+    return this.usersService.findSearchEngine(searchTerm);
+  }
+
   @Get()
   findAll(
     @Query('page', new ParseIntPipe({ optional: true })) page?: number,

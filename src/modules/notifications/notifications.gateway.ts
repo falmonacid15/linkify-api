@@ -11,34 +11,67 @@ import { Socket, Server } from 'socket.io';
 
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { NotificationsService } from './notifications.service';
+import { UsersService } from '../users/users.service';
 
 @WebSocketGateway()
 export class NotificationsGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(private readonly notificationsService: NotificationsService) {}
+  constructor(
+    private readonly notificationsService: NotificationsService,
+    private readonly userService: UsersService,
+  ) {}
 
   @WebSocketServer()
   server: Server;
 
-  handleConnection(@ConnectedSocket() client: Socket) {
-    console.log(`🟢 Usuario conectado en notificaciones: ${client.id}`);
+  private connectedUsers: Map<string, string> = new Map();
+
+  async handleConnection(@ConnectedSocket() client: Socket) {
     const userId = client.handshake.query.userId as string;
     if (userId) {
+      this.connectedUsers.set(userId, client.id);
+      await this.userService.update(
+        { id: userId },
+        {
+          isOnline: true,
+        },
+      );
+      console.log(`🟢 Usuario ${userId} conectado con socket ${client.id}`);
     }
   }
 
-  handleDisconnect(@ConnectedSocket() client: Socket) {
-    console.log(`🔴 Usuario desconectado en notificaciones: ${client.id}`);
+  async handleDisconnect(@ConnectedSocket() client: Socket) {
+    const userId = client.handshake.query.userId as string;
+    if (userId) {
+      this.connectedUsers.delete(userId);
+      await this.userService.update(
+        { id: userId },
+        {
+          isOnline: false,
+          lastSeen: new Date().toISOString(),
+        },
+      );
+      console.log(`🔴 Usuario ${userId} desconectado con socket ${client.id}`);
+    }
   }
 
   @SubscribeMessage('sendNotification')
-  handleSendNotification(
+  async handleSendNotification(
     @ConnectedSocket() client: Socket,
     @MessageBody() notification: CreateNotificationDto,
   ) {
-    this.notificationsService.create(notification);
-    this.server.emit('notificationSent', notification);
+    const savedNotification =
+      await this.notificationsService.create(notification);
+
+    const receiverId = notification.userId;
+    const socketId = this.connectedUsers.get(receiverId);
+
+    if (socketId) {
+      this.server.to(socketId).emit('notificationSent', savedNotification);
+    } else {
+      console.log(`⚠️ Usuario ${receiverId} no está conectado`);
+    }
   }
 
   @SubscribeMessage('receivedNotification')

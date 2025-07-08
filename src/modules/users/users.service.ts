@@ -28,12 +28,33 @@ export class UsersService {
               contains: searchTerm,
               mode: 'insensitive',
             },
+          },
+          {
             lastName: {
               contains: searchTerm,
               mode: 'insensitive',
             },
           },
+          {
+            email: {
+              contains: searchTerm,
+              mode: 'insensitive',
+            },
+          },
+          {
+            interests: {
+              some: {
+                name: {
+                  contains: searchTerm,
+                  mode: 'insensitive',
+                },
+              },
+            },
+          },
         ],
+      },
+      include: {
+        interests: true,
       },
     });
   }
