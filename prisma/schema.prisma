@@ -58,10 +58,20 @@ model Notification {
   content String?
   isRead  Boolean          @default(false)
 
+  postId       String?
+  commentId    String?
+  reactionId   String?
+  friendshipId String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  post       Post?       @relation(fields: [postId], references: [id], onDelete: SetNull)
+  comment    Comment?    @relation(fields: [commentId], references: [id], onDelete: SetNull)
+  reaction   Reaction?   @relation(fields: [reactionId], references: [id], onDelete: SetNull)
+  friendship Friendship? @relation(fields: [friendshipId], references: [id], onDelete: SetNull)
 }
 
 model Friendship {
@@ -76,6 +86,8 @@ model Friendship {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  notifications Notification[]
 }
 
 model Post {
@@ -88,10 +100,11 @@ model Post {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  author    User       @relation("UserPosts", fields: [authorId], references: [id], onDelete: Cascade)
-  comments  Comment[]
-  reactions Reaction[]
-  reposts   Repost[]
+  author        User           @relation("UserPosts", fields: [authorId], references: [id], onDelete: Cascade)
+  comments      Comment[]
+  reactions     Reaction[]
+  reposts       Repost[]
+  notifications Notification[]
 }
 
 model Comment {
@@ -103,8 +116,9 @@ model Comment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post          Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author        User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  notifications Notification[]
 }
 
 model Reaction {
@@ -116,8 +130,9 @@ model Reaction {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
-  post Post @relation(fields: [postId], references: [id])
+  user          User           @relation(fields: [userId], references: [id])
+  post          Post           @relation(fields: [postId], references: [id])
+  notifications Notification[]
 
   @@unique([postId, userId])
 }
@@ -177,6 +192,7 @@ enum ReactionType {
 enum NotificationType {
   NEW_REACTION
   NEW_COMMENT
+  NEW_REPOST
   NEW_FRIEND_REQUEST
   FRIEND_REQUEST_ACCEPTED
 }
